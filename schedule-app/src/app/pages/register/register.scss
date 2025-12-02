@@ -1,0 +1,47 @@
+.register-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5; // Light gray background
+  padding: 20px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 500px; // Limits width on large screens
+  padding: 20px;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; // Adds space between fields
+  margin-top: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+
+.row {
+  display: flex;
+  gap: 15px;
+  
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+.register-btn {
+  margin-top: 10px;
+  padding: 10px;
+}
+
+mat-card-actions {
+  justify-content: center;
+  margin-top: 10px;
+}

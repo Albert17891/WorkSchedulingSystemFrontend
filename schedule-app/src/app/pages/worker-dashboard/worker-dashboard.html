@@ -1,0 +1,128 @@
+<div class="calendar-container">
+  
+  <!-- 1. CALENDAR CONTROLS -->
+  <div class="calendar-controls">
+    <div class="nav-group">
+      <button class="nav-btn" (click)="changeWeek(-1)" title="Previous Week">&lsaquo;</button>
+      <button class="today-btn" (click)="generateWeek(currentDate)">Today</button>
+      <button class="nav-btn" (click)="changeWeek(1)" title="Next Week">&rsaquo;</button>
+    </div>
+    
+    <h2 class="month-label">{{ weekDays[0] | date:'MMMM yyyy' }}</h2>
+    
+    <div class="actions">
+       <button class="btn-primary" (click)="openCreateForDate(currentDate)">+ New Request</button>
+    </div>
+  </div>
+
+  <!-- 2. CALENDAR GRID -->
+  <div class="week-grid">
+    <!-- Loop through 7 Days -->
+    <div class="day-column" *ngFor="let day of weekDays" [class.is-today]="isToday(day)">
+      
+      <!-- HEADER -->
+      <div class="day-header">
+        <span class="day-name">{{ day | date:'EEE' }}</span>
+        <span class="day-number">{{ day | date:'d' }}</span>
+      </div>
+
+      <!-- BODY -->
+      <div class="day-body">
+        
+        <!-- SCHEDULE CARD (If exists) -->
+        <ng-container *ngIf="getScheduleForDate(day) as schedule">
+          <div class="shift-card" 
+               [ngClass]="schedule.status.toLowerCase()"
+               (click)="openEdit(schedule)"
+               title="Click to Edit">
+            
+            <div class="shift-header">
+              <span class="status-label">{{ schedule.status }}</span>
+              <span class="job-count-label">{{ schedule.jobs.length }} Jobs</span>
+            </div>
+            
+            <!-- JOB LIST PREVIEW -->
+            <div class="job-list-preview">
+              <!-- Show first 3 jobs -->
+              <div *ngFor="let job of schedule.jobs | slice:0:3" class="job-preview">
+                <span class="job-title">{{ job.title }}</span>
+                <span class="job-desc" *ngIf="job.description">{{ job.description }}</span>
+              </div>
+            </div>
+            
+            <!-- MORE INDICATOR -->
+            <div *ngIf="schedule.jobs.length > 3" class="more-indicator">
+              + {{ schedule.jobs.length - 3 }} more...
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ADD BUTTON (If no schedule) -->
+        <div *ngIf="!getScheduleForDate(day)" 
+             class="empty-slot" 
+             (click)="openCreateForDate(day)">
+          <span class="plus-icon">+</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== -->
+<!-- MODAL FORM -->
+<!-- =========================== -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Edit' : 'New' }} Request</h2>
+      <button class="btn-close" (click)="closeModal()">&times;</button>
+    </div>
+
+    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+      <div class="modal-body">
+        
+        <!-- DATE INPUT -->
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" formControlName="date" class="form-input">
+        </div>
+
+        <!-- JOBS HEADER -->
+        <div class="jobs-header">
+          <h3>Jobs</h3>
+          <button type="button" class="btn-small" (click)="addJob()">+ Add Job</button>
+        </div>
+
+        <!-- JOBS LIST -->
+        <div formArrayName="jobs">
+          <div *ngFor="let job of jobsArray.controls; let i=index" [formGroupName]="i" class="job-row">
+            
+            <div class="job-inputs">
+              <div class="row-top">
+                <input type="text" placeholder="Title" formControlName="title" class="input-title">
+                <input type="time" formControlName="duration" class="input-time">
+              </div>
+              <input type="text" placeholder="Description" formControlName="description" class="input-desc">
+            </div>
+
+            <button type="button" class="btn-remove" (click)="removeJob(i)">&times;</button>
+          </div>
+        </div>
+        
+        <div class="empty-jobs-warning" *ngIf="jobsArray.length === 0">
+          Please add at least one job.
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-text" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="scheduleForm.invalid || jobsArray.length === 0">
+          {{ isEditMode ? 'Save Changes' : 'Submit Request' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

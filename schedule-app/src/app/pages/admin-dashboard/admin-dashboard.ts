@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit,ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Schedule } from '../../services/schedule'; 
 import { ScheduleDetailsDto } from '../../models/schedule-models';
@@ -10,7 +10,10 @@ import { ScheduleStatus } from '../../models/ScheduleStatus.enum';
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss',
 })
-export class AdminDashboard {
+export class AdminDashboard  implements OnInit{
+
+  constructor(private cd: ChangeDetectorRef) {}
+
    private scheduleService = inject(Schedule);
   
    pendingSchedules: ScheduleDetailsDto[] = [];
@@ -18,6 +21,7 @@ export class AdminDashboard {
 
    ngOnInit() {
     this.loadPending();
+   
   }
 
   loadPending() {
@@ -25,7 +29,10 @@ export class AdminDashboard {
     this.scheduleService.getPendingSchedules().subscribe({
       next: (data) => {
         this.pendingSchedules = data;
+       
         this.isLoading = false;
+        
+          this.cd.detectChanges(); 
       },
       error: (err) => {
         console.error('Failed to load schedules', err);
@@ -48,7 +55,7 @@ export class AdminDashboard {
     this.scheduleService.changeStatus(id, status).subscribe({
       next: () => {
        
-        this.pendingSchedules = this.pendingSchedules.filter(s => s.id !== id);
+        this.pendingSchedules = this.pendingSchedules.filter(s => s.scheduleId !== id);
         
       },
       error: (err) => {

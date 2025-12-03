@@ -12,7 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { Auth} from '../../services/auth';  
-import { RegisterRequest } from '../../models/auth-models';
+import { UserRegisterDto } from '../../models/auth-models';
 
 @Component({
   selector: 'app-register',
@@ -59,14 +59,13 @@ export class Register {
     if (this.registerForm.invalid) return;
 
   
-    const requestData: RegisterRequest = {
+    const requestData: UserRegisterDto= {
       firstName: this.registerForm.value.firstName,
       lastName: this.registerForm.value.lastName,
       email: this.registerForm.value.email,
       gender: this.registerForm.value.gender,
       birthDate: this.registerForm.value.birthDate,
-      password: this.registerForm.value.password,
-      confirmPassword:this.registerForm.value.confirmPassword
+      password: this.registerForm.value.password    
     };
 
     this.authService.register(requestData).subscribe({

@@ -5,15 +5,19 @@
     <p>Review and manage worker schedule requests</p>
   </header>
 
+  <!-- Loading -->
   <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
     Loading requests...
   </div>
 
+  <!-- Empty State -->
   <div *ngIf="!isLoading && pendingSchedules.length === 0" class="empty-state">
     <h3>All caught up!</h3>
     <p>There are no pending schedule requests.</p>
   </div>
 
+  <!-- List -->
   <div class="cards-grid" *ngIf="!isLoading && pendingSchedules.length > 0">
     
     <div class="request-card" *ngFor="let schedule of pendingSchedules">
@@ -22,6 +26,10 @@
         <div class="date-info">
           <span class="label">Requested Date</span>
           <span class="date-badge">{{ schedule.date | date:'EEE, MMM d' }}</span>
+        </div>
+
+        <div class="status-badge">
+          Status: {{ schedule.status }}
         </div>
       </div>
 
@@ -36,8 +44,8 @@
       </div>
 
       <div class="card-actions">
-        <button class="btn-reject" (click)="reject(schedule.id)">Reject</button>
-        <button class="btn-approve" (click)="approve(schedule.id)">Approve</button>
+        <button class="btn-reject" (click)="reject(schedule.scheduleId)">Reject</button>
+        <button class="btn-approve" (click)="approve(schedule.scheduleId)">Approve</button>
       </div>
 
     </div>

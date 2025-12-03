@@ -3,6 +3,10 @@ import { Login } from './pages/login/login';
 import { Register
   
  } from './pages/register/register';
+import { AdminDashboard } from './pages/admin-dashboard/admin-dashboard';
+import { WorkerDashboard } from './pages/worker-dashboard/worker-dashboard';
+import { roleGuard } from './guards/role-guard';
+
 export const routes: Routes = [
      { 
     path: '', 
@@ -19,6 +23,17 @@ export const routes: Routes = [
     component:Register,
     pathMatch:'full'
   },
- 
+ { 
+    path: 'admin', 
+    component: AdminDashboard,
+    canActivate: [roleGuard],
+    data: { role: 'Admin' } 
+  },
+  { 
+    path: 'worker', 
+    component: WorkerDashboard,
+    canActivate: [roleGuard],
+    data: { role: 'Worker' } 
+  },
   { path: '**', redirectTo: '' }
 ];

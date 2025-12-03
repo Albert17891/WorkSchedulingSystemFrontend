@@ -37,7 +37,7 @@ export class Register {
   private authService = inject(Auth); 
   private router = inject(Router);
 
-  // Updated to match your HTML fields
+  
   registerForm: FormGroup = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -58,7 +58,7 @@ export class Register {
   onSubmit() {
     if (this.registerForm.invalid) return;
 
-    // Prepare data (exclude confirmPassword)
+  
     const requestData: RegisterRequest = {
       firstName: this.registerForm.value.firstName,
       lastName: this.registerForm.value.lastName,

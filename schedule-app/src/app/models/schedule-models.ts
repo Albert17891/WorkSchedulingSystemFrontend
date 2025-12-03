@@ -14,7 +14,7 @@ export interface UpdateJobDto {
 }
 
 export interface JobDetailsDto{
-  id:string  
+  jobId:string  
   title: string;
   description: string;
   duration: string; 
@@ -32,8 +32,8 @@ export interface UpdateScheduleDto {
 }
 
 export interface ScheduleDetailsDto{
-     id:string  
+     scheduleId:string  
      date: string;     
-     Status:ScheduleStatus     
+     status:string     
      jobs: JobDetailsDto[];
 }

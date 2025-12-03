@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { LoginRequest, RegisterRequest } from '../models/auth-models';
+import { LoginRequest, UserRegisterDto } from '../models/auth-models';
 import { Observable,tap } from 'rxjs';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class Auth {
    private apiUrl='https://localhost:44312/api/user'
    private tokenKey = 'authToken';
 
-   register(data:RegisterRequest):Observable<any>{
+   register(data:UserRegisterDto):Observable<any>{
     return this.http.post(`${this.apiUrl}/register`,data);
    }
 

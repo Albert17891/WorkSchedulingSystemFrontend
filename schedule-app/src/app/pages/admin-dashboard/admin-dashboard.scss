@@ -1,0 +1,148 @@
+
+$primary-color: #3f51b5;
+$success-color: #4caf50; 
+$danger-color: #f44336;  
+$bg-color: #f5f7fa;
+$card-bg: #ffffff;
+$text-dark: #333;
+$text-light: #666;
+
+.dashboard-container {
+  padding: 20px;
+  background-color: $bg-color;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-header {
+  margin-bottom: 30px;
+  h1 {
+    color: $primary-color;
+    margin-bottom: 5px;
+  }
+  p {
+    color: $text-light;
+  }
+}
+
+.loading-spinner, .empty-state {
+  text-align: center;
+  padding: 40px;
+  color: $text-light;
+  font-size: 1.2rem;
+}
+
+/* --- Grid Layout --- */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 20px;
+}
+
+/* --- Card Styling --- */
+.request-card {
+  background: $card-bg;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+  }
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  .label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+  
+  .date-badge {
+    background-color: #e3f2fd;
+    color: $primary-color;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+}
+
+.card-body {
+  padding: 15px;
+  flex: 1; 
+
+  h4 {
+    margin-top: 0;
+    font-size: 0.9rem;
+    color: $text-light;
+  }
+
+  .job-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #eee;
+      font-size: 0.9rem;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .job-duration {
+        color: $text-light;
+        font-family: monospace; // Makes time look better
+      }
+    }
+  }
+}
+
+.card-actions {
+  padding: 15px;
+  background-color: #fafafa;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+
+  button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+
+    &.btn-approve {
+      background-color: $success-color;
+      color: white;
+      &:hover { background-color: darken($success-color, 10%); }
+    }
+
+    &.btn-reject {
+      background-color: white;
+      border: 1px solid $danger-color;
+      color: $danger-color;
+      &:hover { background-color: #ffebee; }
+    }
+  }
+}

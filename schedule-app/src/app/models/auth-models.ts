@@ -6,13 +6,13 @@ export interface LoginRequest {
 }
 
 
-export interface RegisterRequest {
+export interface UserRegisterDto {
   firstName:string;
   lastName:string;
   gender: Gender;
   email: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
   birthDate: string;
  
 }

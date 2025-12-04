@@ -1,0 +1,153 @@
+<div class="scheduler-wrapper">
+
+  <!-- 1. TOP TOOLBAR -->
+  <div class="scheduler-toolbar">
+    <div class="left-controls">
+      
+      <!-- PAGE TITLE (New) -->
+      <h1 class="page-title">My Schedule</h1>
+
+      <!-- View Switcher -->
+      <div class="view-switcher mr-3">
+        <p-button icon="pi pi-calendar" [text]="viewMode !== 'calendar'" [outlined]="viewMode === 'calendar'" (onClick)="viewMode = 'calendar'" pTooltip="Calendar View"></p-button>
+        <p-button icon="pi pi-list" [text]="viewMode !== 'list'" [outlined]="viewMode === 'list'" (onClick)="viewMode = 'list'" pTooltip="List View"></p-button>
+      </div>
+
+      <!-- Calendar Nav (Only visible in Calendar Mode) -->
+      <ng-container *ngIf="viewMode === 'calendar'">
+        <p-button icon="pi pi-chevron-left" [text]="true" [rounded]="true" (onClick)="changeWeek(-1)"></p-button>
+        <p-button label="Today" [outlined]="true" size="small" (onClick)="generateWeek(currentDate)"></p-button>
+        <p-button icon="pi pi-chevron-right" [text]="true" [rounded]="true" (onClick)="changeWeek(1)"></p-button>
+        
+        <h2 class="current-month">{{ weekDays[0] | date:'MMMM yyyy' }}</h2>
+      </ng-container>
+
+      <h2 class="current-month" *ngIf="viewMode === 'list'">My Job List</h2>
+    </div>
+
+    <div class="right-controls">
+      <p-button label="New Request" icon="pi pi-plus" (onClick)="openCreateForDate(currentDate)"></p-button>
+    </div>
+  </div>
+
+  <!-- 2. WEEKLY GRID VIEW -->
+  <div class="week-grid" *ngIf="viewMode === 'calendar'">
+    <!-- Day Column Loop -->
+    <div class="day-column" *ngFor="let day of weekDays" [class.today-column]="isToday(day)">
+      <!-- Column Header -->
+      <div class="day-header">
+        <span class="day-name">{{ day | date:'EEE' }}</span>
+        <span class="day-number">{{ day | date:'d' }}</span>
+      </div>
+      <!-- Column Body -->
+      <div class="day-body">
+        <!-- CASE A: Shift Exists -->
+        <ng-container *ngIf="getScheduleForDate(day) as schedule">
+          <div class="shift-block" 
+               [ngClass]="schedule.status.toLowerCase()"
+               (click)="openEdit(schedule)"
+               pRipple>
+            <div class="shift-time">
+              <i class="pi pi-clock"></i> {{ schedule.jobs.length }} Tasks
+            </div>
+            <div class="shift-details">
+               <div *ngFor="let job of schedule.jobs | slice:0:3" class="job-line">
+                 {{ job.title }}
+               </div>
+               <div *ngIf="schedule.jobs.length > 3" class="more-indicator">...</div>
+            </div>
+            <div class="status-indicator">{{ schedule.status }}</div>
+          </div>
+        </ng-container>
+        <!-- CASE B: Empty (Add Button) -->
+        <div *ngIf="!getScheduleForDate(day)" 
+             class="empty-cell" 
+             (click)="openCreateForDate(day)">
+             <span class="add-hint">+ Add</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TABLE LIST VIEW -->
+  <div class="table-view" *ngIf="viewMode === 'list'">
+    <p-table [value]="tableData" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="10">
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="title">Job Title <p-sortIcon field="title"></p-sortIcon></th>
+                <th pSortableColumn="scheduleDate">Date / Day <p-sortIcon field="scheduleDate"></p-sortIcon></th>
+                <th pSortableColumn="duration">Duration <p-sortIcon field="duration"></p-sortIcon></th>
+                <th pSortableColumn="scheduleStatus">Status <p-sortIcon field="scheduleStatus"></p-sortIcon></th>
+                <th>Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+            <tr>
+                <td><span class="font-bold">{{ row.title }}</span></td>
+                <td>{{ row.scheduleDate | date:'EEEE, dd MMM' }}</td>
+                <td>{{ row.duration }}</td>
+                <td>
+                    <p-tag [value]="row.scheduleStatus" [severity]="getSeverity(row.scheduleStatus)"></p-tag>
+                </td>
+                <td>
+                     <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" (onClick)="openEditById(row.scheduleId)" pTooltip="Edit Schedule"></p-button>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5" class="text-center p-4">No jobs found.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- 4. PRIMENG DIALOG (Modal) -->
+<p-dialog 
+  [(visible)]="showModal" 
+  [modal]="true" 
+  [header]="isEditMode ? 'Edit Schedule' : 'New Schedule'" 
+  [draggable]="false" 
+  [resizable]="false" 
+  [style]="{width: '500px'}">
+
+  <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="modal-form">
+    <!-- Date Field -->
+    <div class="field-group">
+      <label>Date</label>
+      <input pInputText type="date" formControlName="date" class="w-full">
+    </div>
+
+    <!-- Jobs List -->
+    <div class="jobs-section">
+      <div class="section-header">
+        <h3>Jobs / Tasks</h3>
+        <p-button label="Add Job" icon="pi pi-plus" [text]="true" size="small" (onClick)="addJob()"></p-button>
+      </div>
+
+      <div formArrayName="jobs" class="job-list">
+        <div *ngFor="let job of jobsArray.controls; let i=index" [formGroupName]="i" class="job-row">
+          <div class="job-inputs">
+            <div class="row-top">
+              <input pInputText placeholder="Title" formControlName="title" class="flex-1">
+              <input pInputText type="time" formControlName="duration" style="width: 100px">
+            </div>
+            <input pInputText placeholder="Description" formControlName="description" class="w-full mt-2">
+          </div>
+          <p-button icon="pi pi-trash" [text]="true" severity="danger" (onClick)="removeJob(i)"></p-button>
+        </div>
+      </div>
+      
+      <div *ngIf="jobsArray.length === 0" class="empty-warning">
+        Please add at least one job.
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="closeModal()"></p-button>
+      <p-button label="Save Schedule" type="submit" [disabled]="scheduleForm.invalid"></p-button>
+    </div>
+  </form>
+</p-dialog>

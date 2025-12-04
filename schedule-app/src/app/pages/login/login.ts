@@ -46,14 +46,18 @@ export class Login {
     this.auth.login(this.loginForm.value).subscribe({
       next: (response: any) => {
        
-        const token = response.token || response.access_token || response.jwt;
-        
-        if (token) {
-          localStorage.setItem('auth_token', token);    
-       
-        }      
         console.log('Login successful, token saved!');
-        this.router.navigate(['/']);
+
+       const role = this.auth.getUserRole(); 
+
+        if (role === 'Admin') {
+           this.router.navigate(['/admin']);  
+         } else if (role === 'Worker') {
+         this.router.navigate(['/worker']); 
+        } else {
+      
+      this.router.navigate(['/']); 
+    }
       },
       error: (err) => {
         this.loading = false;

@@ -5,9 +5,35 @@ import { Schedule } from '../../services/schedule';
 import { ScheduleDetailsDto, CreateScheduleDto, UpdateScheduleDto } from '../../models/schedule-models';
 import { ScheduleStatus } from '../../models/ScheduleStatus.enum';
 
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';     
+import { MatIconModule } from '@angular/material/icon';      
+import { MatInputModule } from '@angular/material/input';       
+import { MatFormFieldModule } from '@angular/material/form-field'; 
+
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { RippleModule } from 'primeng/ripple';
+import { TableModule } from 'primeng/table'; 
+import { TagModule } from 'primeng/tag';  
+
 @Component({
   selector: 'app-worker-dashboard',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+
+    DialogModule,
+    ButtonModule,
+    InputTextModule,
+    RippleModule,
+     TableModule, 
+    TagModule
+  ],
   templateUrl: './worker-dashboard.html',
   styleUrl: './worker-dashboard.scss',
 })
@@ -15,21 +41,22 @@ export class WorkerDashboard implements OnInit {
   private fb = inject(FormBuilder);
   private scheduleService = inject(Schedule);
 
- 
 
-   // --- CALENDAR STATE ---
-  currentDate = new Date();
+ currentDate = new Date();
   weekDays: Date[] = [];
-  
-  // --- DATA STATE ---
   mySchedules: ScheduleDetailsDto[] = [];
-  isLoading = false;
   
-  // --- MODAL STATE ---
+  // Flat data for the p-table view
+  tableData: any[] = []; 
+  
+  // View State
+  viewMode: 'calendar' | 'list' = 'calendar'; // Controls the active view
+
+  isLoading = false;
   showModal = false;
   isEditMode = false;
   currentScheduleId: string | null = null;
-  eStatus = ScheduleStatus; // Helper for Template comparisons
+  eStatus = ScheduleStatus;
 
   scheduleForm: FormGroup = this.fb.group({
     date: ['', Validators.required],
@@ -41,11 +68,43 @@ export class WorkerDashboard implements OnInit {
     this.loadMySchedules();
   }
 
-  // ==========================================
-  // 📅 CALENDAR / WEEK VIEW LOGIC
-  // ==========================================
-  
-  // Generates the 7 days for the "Group by Calendar" Grid View
+  // --- DATA LOADING & PROCESSING ---
+  loadMySchedules() {
+    this.isLoading = true;
+    this.scheduleService.getUsersSchedules().subscribe({
+      next: (data) => { 
+        this.mySchedules = data; 
+        this.processTableData(data); // <--- Process data for table
+        this.isLoading = false; 
+      },
+      error: () => this.isLoading = false
+    });
+  }
+
+  // Flattens the schedule hierarchy into a list of jobs for the table
+  processTableData(schedules: ScheduleDetailsDto[]) {
+    this.tableData = schedules.flatMap(schedule => 
+      schedule.jobs.map(job => ({
+        ...job, // title, description, duration
+        scheduleDate: schedule.date,
+        scheduleStatus: schedule.status,
+        scheduleId: schedule.scheduleId
+      }))
+    );
+  }
+
+  // --- HELPER FOR TABLE TAGS ---
+  // Fixed: Changed 'warning' to 'warn' to match PrimeNG Tag severity type
+  getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | undefined {
+    switch (status.toLowerCase()) {
+      case 'approved': return 'success';
+      case 'rejected': return 'danger';
+      case 'pending': return 'warn';
+      default: return 'info';
+    }
+  }
+
+  // --- CALENDAR LOGIC ---
   generateWeek(refDate: Date) {
     this.weekDays = [];
     const start = this.getStartOfWeek(new Date(refDate));
@@ -56,20 +115,17 @@ export class WorkerDashboard implements OnInit {
     }
   }
 
-  // Ensures Monday is the start of the week
   getStartOfWeek(date: Date) {
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(date.setDate(diff));
   }
 
-  // Navigates Previous/Next Week
   changeWeek(offset: number) {
     this.currentDate.setDate(this.currentDate.getDate() + (offset * 7));
     this.generateWeek(this.currentDate);
   }
 
-  // Groups data by date: Finds the specific schedule for a grid column
   getScheduleForDate(date: Date) {
     return this.mySchedules.find(s => {
       const d = new Date(s.date);
@@ -86,19 +142,8 @@ export class WorkerDashboard implements OnInit {
            date.getFullYear() === t.getFullYear();
   }
 
-  // ==========================================
-  // 💾 DATA & FORM LOGIC
-  // ==========================================
-  
+  // --- FORM LOGIC ---
   get jobsArray() { return this.scheduleForm.get('jobs') as FormArray; }
-
-  loadMySchedules() {
-    this.isLoading = true;
-    this.scheduleService.getUsersSchedules().subscribe({
-      next: (data) => { this.mySchedules = data; this.isLoading = false; },
-      error: () => this.isLoading = false
-    });
-  }
 
   createJobGroup(title = '', desc = '', duration = '01:00') {
     return this.fb.group({
@@ -111,7 +156,6 @@ export class WorkerDashboard implements OnInit {
   addJob() { this.jobsArray.push(this.createJobGroup()); }
   removeJob(i: number) { this.jobsArray.removeAt(i); }
 
-  // Opens the Create Modal pre-filled with the date clicked in the calendar
   openCreateForDate(date: Date) {
     this.isEditMode = false;
     this.currentScheduleId = null;
@@ -119,13 +163,21 @@ export class WorkerDashboard implements OnInit {
     this.jobsArray.clear();
     this.addJob();
 
-    // Adjust for timezones to ensure the date input shows the correct day selected
+    // Adjust date string for input
     const offset = date.getTimezoneOffset();
     const localDate = new Date(date.getTime() - (offset * 60 * 1000));
     const dateStr = localDate.toISOString().split('T')[0];
 
     this.scheduleForm.patchValue({ date: dateStr });
     this.showModal = true;
+  }
+
+  // Opens modal for a specific schedule (found by ID in flat table row)
+  openEditById(scheduleId: string) {
+    const schedule = this.mySchedules.find(s => s.scheduleId === scheduleId);
+    if (schedule) {
+      this.openEdit(schedule);
+    }
   }
 
   openEdit(schedule: ScheduleDetailsDto) {

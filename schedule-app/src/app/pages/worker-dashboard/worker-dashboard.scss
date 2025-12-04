@@ -1,63 +1,76 @@
-$bg-color: #f6f7f9;
-$border-color: #e0e0e0;
-$primary: #3f51b5;
+// --- Variables ---
+$bg-color: #f8f9fa;
+$border-color: #dee2e6;
+$primary: #3f51b5; 
 $today-highlight: #e8eaf6;
-$text-color: #333;
+$text-color: #495057;
+$bg-app: #ffffff;
 
-.calendar-container {
+.scheduler-wrapper {
   padding: 20px;
   background-color: $bg-color;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 // --- 1. Header & Controls ---
-.calendar-controls {
+.scheduler-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
   background: white;
-  padding: 10px 20px;
+  padding: 15px 20px;
   border-radius: 8px;
   border: 1px solid $border-color;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 
-  .nav-group {
-    display: flex; gap: 5px;
-    .nav-btn {
-      background: none; border: 1px solid $border-color; border-radius: 4px;
-      width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
-      &:hover { background: #f0f0f0; }
-    }
-    .today-btn {
-      background: #f0f0f0; border: none; padding: 0 12px; border-radius: 4px; 
-      font-weight: 600; cursor: pointer; font-size: 0.9rem;
-      &:hover { background: #e0e0e0; }
-    }
-  }
+  .left-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 
-  .month-label { margin: 0; font-size: 1.2rem; font-weight: 600; color: $text-color; }
-  
-  .btn-primary {
-    background: $primary; color: white; border: none; padding: 8px 16px;
-    border-radius: 4px; cursor: pointer; font-weight: 600;
-    &:hover { background: darken($primary, 10%); }
+    // --- NEW: Job Title / Page Title Style ---
+    .page-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: $primary;
+        margin-right: 10px;
+        padding-right: 15px;
+        border-right: 1px solid $border-color;
+        letter-spacing: -0.5px;
+        white-space: nowrap;
+    }
+
+    .view-switcher {
+        display: flex;
+        gap: 5px;
+        padding-right: 15px;
+        border-right: 1px solid $border-color;
+    }
+
+    .current-month {
+      margin: 0 0 0 10px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $text-color;
+    }
   }
 }
 
-// --- 2. The Grid ---
+// --- 2. Grid Layout (Calendar View) ---
 .week-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr); // 7 Equal Columns
-  gap: 1px; // Gap for border effect
-  background-color: $border-color; // Color of the grid lines
+  gap: 1px;
+  background-color: $border-color; 
   border: 1px solid $border-color;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  flex: 1; // Fill remaining height
+  flex: 1; 
+  background-color: white;
 }
 
 .day-column {
@@ -66,189 +79,169 @@ $text-color: #333;
   flex-direction: column;
   min-height: 200px;
   
-  &.is-today {
-    background-color: lighten($today-highlight, 2%);
-    .day-header { color: $primary; font-weight: bold; background-color: $today-highlight; }
+  &.today-column {
+    background-color: #fafbff;
+    .day-header { 
+        color: $primary; 
+        font-weight: 700; 
+        background-color: rgba($primary, 0.05);
+    }
   }
 }
 
 .day-header {
-  padding: 10px;
+  padding: 12px;
   text-align: center;
   border-bottom: 1px solid lighten($border-color, 5%);
-  background: #fafafa;
+  background: #fff;
   
-  .day-name { display: block; font-size: 0.8rem; text-transform: uppercase; color: #888; font-weight: 600; }
-  .day-number { font-size: 1.5rem; line-height: 1.2; color: $text-color; }
+  .day-name { display: block; font-size: 0.85rem; text-transform: uppercase; color: #6c757d; font-weight: 600; letter-spacing: 0.5px; }
+  .day-number { font-size: 1.5rem; line-height: 1.2; color: $text-color; font-weight: 400; }
 }
 
 .day-body {
   flex: 1;
-  padding: 6px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  overflow-y: auto; // Scroll if too many cards
+  gap: 8px;
+  overflow-y: auto;
 }
 
-// --- 3. Shift Card (The Event) ---
-.shift-card {
-  border-radius: 6px;
-  padding: 8px;
+// --- 3. Table View (List View) ---
+.table-view {
+    flex: 1;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid $border-color;
+    overflow: hidden;
+    padding: 20px;
+    
+    // Ensure table takes full height if needed or scrolls
+    display: flex;
+    flex-direction: column;
+}
+
+// --- 4. Shift Block (The Event Card) ---
+.shift-block {
+  border-radius: 4px;
+  padding: 10px;
   cursor: pointer;
   border-left: 4px solid #ccc;
   background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   transition: all 0.2s;
-  border: 1px solid #eee; // Subtle border around
+  border: 1px solid #eee;
   border-left-width: 4px;
 
   &:hover { 
     transform: translateY(-2px); 
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.12); 
   }
 
   // Status Colors
-  &.pending { border-left-color: #ff9800; background: #fff8e1; }
-  &.approved { border-left-color: #4caf50; background: #f1f8e9; }
-  &.rejected { border-left-color: #f44336; background: #ffebee; opacity: 0.8; }
+  &.pending { border-left-color: #FF9800; background: #FFF3E0; }
+  &.approved { border-left-color: #4CAF50; background: #E8F5E9; }
+  &.rejected { border-left-color: #F44336; background: #FFEBEE; opacity: 0.8; }
 
-  .shift-header {
-    display: flex; justify-content: space-between; align-items: center;
+  .shift-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 600;
     margin-bottom: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px dashed rgba(0,0,0,0.1);
-    font-size: 0.75rem; font-weight: bold; color: #666;
-  }
-
-  // New Job Preview Style
-  .job-list-preview {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    align-items: center;
+    gap: 5px;
   }
 
-  .job-preview {
-    margin-bottom: 2px;
-    padding: 2px 0;
-    
-    .job-title { 
-      font-size: 0.8rem; 
-      font-weight: 600; 
-      color: $text-color; 
-      display: block;
-    }
-    .job-desc {
-      font-size: 0.7rem;
-      color: #777;
+  .shift-details {
+    .job-line {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $text-color;
       white-space: nowrap; 
       overflow: hidden; 
       text-overflow: ellipsis;
-      display: block;
+      margin-bottom: 2px;
+    }
+    .more-indicator {
+      font-size: 0.75rem; color: $primary; font-weight: 600; margin-top: 4px;
     }
   }
 
-  .more-indicator {
-    font-size: 0.7rem; color: $primary; text-align: center; margin-top: 2px; font-weight: 600;
+  .status-indicator {
+    margin-top: 8px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgba(0,0,0,0.4);
+    text-align: right;
   }
 }
 
-// --- 4. Empty Slot (+ Button) ---
-.empty-slot {
+// --- 5. Empty Cell ---
+.empty-cell {
   flex: 1;
-  border: 2px dashed #eee;
+  border: 2px dashed #e9ecef;
   border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  color: #ddd; cursor: pointer; transition: 0.2s;
-  min-height: 40px;
+  color: transparent; cursor: pointer; transition: 0.2s;
+  min-height: 50px;
   margin-top: 5px;
 
+  .add-hint { font-weight: 600; font-size: 0.9rem; }
+
   &:hover { 
-    border-color: $primary; background: rgba($primary, 0.05); 
-    .plus-icon { transform: scale(1.2); color: $primary; }
-  }
-  
-  .plus-icon { font-size: 1.5rem; transition: 0.2s; }
-}
-
-// --- 5. Modal Styles ---
-.modal-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5); z-index: 1000;
-  display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(2px);
-}
-
-.modal-box {
-  background: white; width: 500px; padding: 25px; border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  display: flex; flex-direction: column; max-height: 85vh;
-}
-
-.modal-header { 
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-  h2 { margin: 0; font-size: 1.25rem; color: $primary; }
-  .btn-close { 
-    background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #999; 
-    line-height: 1; padding: 0;
-    &:hover { color: #333; }
+    border-color: $primary; background: rgba($primary, 0.05); color: $primary;
   }
 }
 
-.modal-body { overflow-y: auto; padding-right: 5px; }
-
-// Form Inputs
-.form-group {
-  margin-bottom: 20px;
-  label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #555; }
-  .form-input { 
-    width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;
-    &:focus { border-color: $primary; outline: none; box-shadow: 0 0 0 3px rgba($primary, 0.1); }
-  }
+// --- 6. Modal Styles ---
+.modal-form {
+    display: flex; flex-direction: column; gap: 1rem;
 }
 
-.jobs-header { 
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;
-  h3 { margin: 0; font-size: 1rem; color: #333; }
+.field-group {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    label { font-weight: 600; color: $text-color; }
+}
+
+.jobs-section {
+    display: flex; flex-direction: column; gap: 10px;
+    border-top: 1px solid $border-color;
+    padding-top: 15px;
+    margin-top: 10px;
+}
+
+.section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    h3 { margin: 0; font-size: 1.1rem; color: $text-color; }
+}
+
+.job-list {
+    display: flex; flex-direction: column; gap: 10px;
 }
 
 .job-row { 
-  display: flex; gap: 8px; margin-bottom: 10px; background: #f9f9f9; padding: 10px; border-radius: 6px;
-  align-items: flex-start;
-  .job-inputs { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-  
-  input { 
-    width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;
-    &:focus { border-color: $primary; outline: none; }
-    &::placeholder { color: #aaa; }
-  }
-
-  .row-top { display: flex; gap: 8px; }
-  .input-title { flex: 2; }
-  .input-time { flex: 1; }
-  .input-desc { width: 100%; }
-
-  .btn-remove { 
-    border: none; background: #ffebee; color: #f44336; cursor: pointer; 
-    width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    margin-top: 4px;
-    &:hover { background: #f44336; color: white; }
-  }
-}
-
-.modal-footer { 
-  margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;
-  display: flex; justify-content: flex-end; gap: 12px; 
-}
-
-.btn-text { background: none; border: none; cursor: pointer; color: #666; font-weight: 600; padding: 10px 20px; &:hover { color: #333; } }
-.btn-small { background: #e3f2fd; border: none; color: $primary; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600; &:hover { background: darken(#e3f2fd, 5%); } }
-.empty-jobs-warning {
-  color: #f44336;
-  background-color: #ffebee;
-  padding: 10px;
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 15px;
+  background-color: #f8f9fa;
   border-radius: 6px;
-  font-size: 0.9rem;
-  margin-top: 10px;
-  text-align: center;
+  border: 1px solid $border-color;
+
+  .job-inputs { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .row-top { display: flex; gap: 10px; }
+}
+
+.form-actions {
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid $border-color;
+}
+
+.empty-warning {
+    padding: 15px;
+    background-color: #fff3cd;
+    color: #856404;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.9rem;
 }
